@@ -34,13 +34,13 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
-          <li class="nav-item active">
-            <a class="nav-link" href="./index.html"
-              >Home <span class="sr-only">(current)</span></a
-            >
-          </li>
           <li class="nav-item">
-            <a class="nav-link" href="./backoffice.html">Backoffice</a>
+            <a class="nav-link" href="./index.html">Home </a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="./backoffice.html"
+              >Backoffice <span class="sr-only">(current)</span></a
+            >
           </li>
         </ul>
       </div>
@@ -111,6 +111,12 @@
                 type="submit"
                 value="Submit event"
               >
+                <span
+                  class="spinner-border spinner-border-sm d-none"
+                  role="status"
+                  aria-hidden="true"
+                  id="loadingSpinner"
+                ></span>
                 Add Product
               </button>
             </div>
@@ -121,6 +127,32 @@
 
     <script>
       const url = "https://striveschool-api.herokuapp.com/api/product/";
+      const headers = {
+        Authorization:
+          "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmFiY2M5NDRiY2RlMTAwMTc2MTZhOTYiLCJpYXQiOjE2MDUwOTQ1NDksImV4cCI6MTYwNjMwNDE0OX0.JMToVdUvDxcKoie5yISpJXvFS_X7OxsS8cbw33i1oV0",
+      };
+
+      window.onload = async () => {
+        let urlParams = new URLSearchParams(window.location.search);
+        id = urlParams.get("id");
+        if (id) {
+          let title = document.querySelector(".container > h2");
+          title.innerText = "Edit Product Item";
+          let button = document.querySelector(".form-group > button");
+          button.innerText = "Update";
+
+          let response = await fetch(url + id, {
+            headers,
+          }); // contacting the endpoint for a single product item
+          let product = await response.json(); // transforming the response body in an usable object, asyncronous operation!
+
+          document.getElementById("name").value = product.name;
+          document.getElementById("description").value = product.description;
+          document.getElementById("brand").value = product.brand;
+          document.getElementById("imageUrl").value = product.description;
+          document.getElementById("price").value = product.price;
+        }
+      };
 
       const handleSubmit = (e) => {
         e.preventDefault(); // preventing the default browser event handling
@@ -128,6 +160,9 @@
       };
 
       const addProduct = async () => {
+        let spinner = document.querySelector("#loadingSpinner");
+        spinner.classList.toggle("d-none"); // showing the spinner
+
         let myProduct = {
           name: document.querySelector("#name").value,
           description: document.querySelector("#description").value,
@@ -137,20 +172,38 @@
         };
 
         try {
-          let response = await fetch(url, {
-            method: "POST",
-            body: JSON.stringify(myProduct),
-            headers: new Headers({
-              "Content-Type": "application/json",
-              Authorization:
-                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmFiY2M5NDRiY2RlMTAwMTc2MTZhOTYiLCJpYXQiOjE2MDUwOTQ1NDksImV4cCI6MTYwNjMwNDE0OX0.JMToVdUvDxcKoie5yISpJXvFS_X7OxsS8cbw33i1oV0",
-            }),
-          });
+          let response;
+
+          if (id) {
+            //
+            response = await fetch(url + id, {
+              method: "PUT",
+              body: JSON.stringify(myProduct),
+              headers: new Headers({
+                "Content-Type": "application/json",
+                Authorization:
+                  "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmFiY2M5NDRiY2RlMTAwMTc2MTZhOTYiLCJpYXQiOjE2MDUwOTQ1NDksImV4cCI6MTYwNjMwNDE0OX0.JMToVdUvDxcKoie5yISpJXvFS_X7OxsS8cbw33i1oV0",
+              }),
+            });
+          } else {
+            response = await fetch(url, {
+              method: "POST",
+              body: JSON.stringify(myProduct),
+              headers: new Headers({
+                "Content-Type": "application/json",
+                Authorization:
+                  "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmFiY2M5NDRiY2RlMTAwMTc2MTZhOTYiLCJpYXQiOjE2MDUwOTQ1NDksImV4cCI6MTYwNjMwNDE0OX0.JMToVdUvDxcKoie5yISpJXvFS_X7OxsS8cbw33i1oV0",
+              }),
+            });
+          }
 
           if (response.ok) {
-            alert("Product added successfully");
+            // checking the ok property which stores the successful result of the operation
+            spinner.classList.toggle("d-none"); // hiding the spinner
+            alert(`Product item ${id ? "updated" : "added"} successfully`);
             location.assign("index.html");
           } else {
+            spinner.classList.toggle("d-none"); // hiding the spinner
             alert("An error occurred!");
           }
         } catch (error) {

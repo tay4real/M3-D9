@@ -128,7 +128,9 @@
                         : product.description.substring(0, 100) + " ..."
                     }</p>
                     <p>
-                      <button>Add to Cart</button>
+                     <a class="btn btn-dark w-100 py-2" href="detail.html?id=${
+                       product._id
+                     }">View Details</a>
                     </p>
                   </div>`;
               currentProducts.appendChild(productItem);
