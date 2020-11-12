@@ -139,7 +139,12 @@
           let title = document.querySelector(".container > h2");
           title.innerText = "Edit Product Item";
           let button = document.querySelector(".form-group > button");
-          button.innerText = "Update";
+          button.innerHTML = `<span
+                  class="spinner-border spinner-border-sm d-none"
+                  role="status"
+                  aria-hidden="true"
+                  id="loadingSpinner"
+                ></span> Update Product`;
 
           let response = await fetch(url + id, {
             headers,
